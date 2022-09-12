@@ -1554,6 +1554,7 @@ version = "0.1.0"
 dependencies = [
  "parity-scale-codec",
  "subxt",
+ "ticker",
  "tokio",
  "tracing-subscriber 0.3.15",
 ]
@@ -2374,6 +2375,12 @@ checksum = "5516c27b78311c50bf42c071425c560ac799b11c30b31f87e3081965fe5e0180"
 dependencies = [
  "once_cell",
 ]
+
+[[package]]
+name = "ticker"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f6821a2afe2700471d4572a25bcbfc091d6d596902a279ed41af139f350b76e"
 
 [[package]]
 name = "tiny-bip39"

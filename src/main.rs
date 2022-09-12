@@ -1,7 +1,11 @@
+extern crate ticker;
+
 #[subxt::subxt(runtime_metadata_path = "metadata.scale")]
 pub mod node_runtime {}
 
 use subxt::{OnlineClient, PolkadotConfig};
+use ticker::Ticker;
+use std::time::Duration;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -13,56 +17,63 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(r#"Generated code is not up to date with node we're connected to"#);
     }
 
-    let block_number = 21646u32;
+    println!("Everything working good!");
 
-    let block_hash = api.rpc().block_hash(Some(block_number.into())).await?;
+    let ticker = Ticker::new(0.., Duration::from_secs(1));
 
-    if block_hash != None {
-        println!(
-            r#"Block hash from number: {} block_hash: {:?}"#,
-            block_number, block_hash
-        );
+    let latest_block_hash = api.rpc().block_hash(None).await.unwrap();
+    let latest_block = api.rpc().block(latest_block_hash).await.unwrap();
 
-        // if let Ok(Some(fullblock)) = api.rpc().block(block_hash.into()).await
-        //     {
-        //     // block.
-        //     for extr in fullblock.block.extrinsics {
+    let mut block_number = latest_block.as_ref().unwrap().block.header.number;
 
-        //         println!("Hello Extrinsics {:?}",extr);
-        //     
-        // }
+    for _ in ticker {
+        
 
-        let events = api.events().at(block_hash.into()).await?;
+        let block_hash = api.rpc().block_hash(Some(block_number.into())).await?;
 
-        /*
-        We can dynamically decode events:
-        */
-        println!("  Dynamic event details: {block_hash:?}:");
-        for event in events.iter() {
-            let event = event?;
-            let is_balance_transfer = event
-                .as_event::<node_runtime::balances::events::Transfer>()?
-                .is_some();
-            let pallet = event.pallet_name();
-            let variant = event.variant_name();
-  
-            
-            println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
-        }
+        if block_hash != None {
 
-        // Or we can find the first transfer event, ignoring any others:
-        let transfer_event = events.find_first::<node_runtime::balances::events::Transfer>()?;
+            println!(
+                r#"Block hash from number: {} block_hash: {:?}"#,
+                block_number, block_hash
+            );
+    
+            let events = api.events().at(block_hash.into()).await?;
+    
+            /*
+            We can dynamically decode events:
+            */
+            println!("  Dynamic event details: {block_hash:?}:");
 
-        if let Some(ev) = transfer_event {
-            println!("  - Balance transfer success: value: {:?}", ev.amount);
+            for event in events.iter() {
+                let event = event?;
+                let is_balance_transfer = event
+                    .as_event::<node_runtime::balances::events::Transfer>()?
+                    .is_some();
+                let pallet = event.pallet_name();
+                let variant = event.variant_name();
+      
+                
+                println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
+            }
+    
+            // Or we can find the first transfer event, ignoring any others:
+            let transfer_event = events.find_first::<node_runtime::balances::events::Transfer>()?;
+    
+            if let Some(ev) = transfer_event {
+                println!("  - Balance transfer success: value: {:?}", ev.amount);
+
+                // Lets do Scan !
+
+            } else {
+                println!("  - No balance transfer event found in this block");
+            }
+    
+            // after scan lets increment block
+            block_number += 1;
+
         } else {
-            println!("  - No balance transfer event found in this block");
-        }
-
-        if let Some(hash) = block_hash {
-            println!("Block hash for block number {block_number}: {hash}");
-        } else {
-            println!("Block number {block_number} not found.");
+            println!("No more blocks");
         }
     }
 

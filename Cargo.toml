@@ -11,3 +11,4 @@ tokio = { version ="1.21.0", features = ["rt", "rt-multi-thread", "macros"] }
 subxt = "0.23.0"
 tracing-subscriber = "0.3.15"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
+ticker = "0.1.1"
