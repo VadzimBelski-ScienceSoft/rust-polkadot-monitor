@@ -12,6 +12,14 @@ use bip39::{Language, Mnemonic, MnemonicType};
 
 use sp_core::{sr25519, ed25519, Pair};
 
+/*
+  You need to use Archive node so you can replay the history and recover in case long downtime.
+
+  An archive node keeps all the past blocks. An archive node makes it convenient to query the past state of the chain at any point in time. 
+  Finding out what an account's balance at a certain block was, or which extrinsics resulted in a certain state change are fast operations when using an archive node. 
+  However, an archive node takes up a lot of disk space - around Kusama's 12 millionth block this was around 660 GB.
+*/
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
