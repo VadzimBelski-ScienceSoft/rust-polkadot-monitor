@@ -15,6 +15,7 @@ use sp_core::{sr25519, ed25519, Pair};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
+    get_address();
 
 
     tracing_subscriber::fmt::init();
@@ -119,7 +120,21 @@ fn get_address() {
     let words = MnemonicType::Words12;
     let mnemonic = Mnemonic::new(words, Language::English);
 
-    let pair = sr25519::Pair::from_string(&mnemonic.to_string(), None).unwrap();
+    let derevative_address = format!("{}/{}", mnemonic.to_string(), "1");
 
-    println!("Public key: {}", pair.public());
+    let pair1 = sr25519::Pair::from_string(&derevative_address, None).unwrap();
+
+    println!("Public key 1 sr25519: {}", pair1.public());
+
+    let derevative_address = format!("{}/{}", mnemonic.to_string(), "2");
+
+    let pair2 = sr25519::Pair::from_string(&derevative_address, None).unwrap();
+
+    println!("Public key 2 sr25519: {}", pair2.public());
+
+
+    let pair3 = ed25519::Pair::from_string(&mnemonic.to_string(), None).unwrap();
+
+    println!("Public key ed25519: {}", pair3.public());
+
 }
